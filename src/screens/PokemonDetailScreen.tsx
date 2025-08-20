@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useCallback } from 'react'
 import { useGetPokemonQuery } from '@/api/pokemonApi'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
@@ -12,6 +12,7 @@ import {
 function PokemonDetailContent() {
 	const { id } = useParams<{ id: string }>()
 	const navigate = useNavigate()
+	const [searchParams] = useSearchParams()
 	const pokemonId = parseInt(id || '0')
 
 	const {
@@ -26,24 +27,31 @@ function PokemonDetailContent() {
 	})
 
 	const handleBackToList = useCallback(() => {
-		// go back to preserve pagination state
-		// else go to the root
-		if (window.history.length > 1) {
-			navigate(-1)
+		const fromPage = searchParams.get('fromPage')
+		if (fromPage) {
+			navigate(`/?page=${fromPage}`)
 		} else {
 			navigate('/')
 		}
-	}, [navigate])
+	}, [navigate, searchParams])
 
 	const handlePrevious = useCallback(() => {
 		if (pokemonId > 1) {
-			navigate(`/pokemon/${pokemonId - 1}`)
+			const fromPage = searchParams.get('fromPage')
+			const url = fromPage
+				? `/pokemon/${pokemonId - 1}?fromPage=${fromPage}`
+				: `/pokemon/${pokemonId - 1}`
+			navigate(url)
 		}
-	}, [navigate, pokemonId])
+	}, [navigate, pokemonId, searchParams])
 
 	const handleNext = useCallback(() => {
-		navigate(`/pokemon/${pokemonId + 1}`)
-	}, [navigate, pokemonId])
+		const fromPage = searchParams.get('fromPage')
+		const url = fromPage
+			? `/pokemon/${pokemonId + 1}?fromPage=${fromPage}`
+			: `/pokemon/${pokemonId + 1}`
+		navigate(url)
+	}, [navigate, pokemonId, searchParams])
 
 	if (error) {
 		if ('status' in error && error.status === 404) {

@@ -9,9 +9,10 @@ import {
 type PokemonCardProps = {
 	id: number
 	name: string
+	currentPage?: number
 }
 
-export function PokemonCard({ id, name }: PokemonCardProps) {
+export function PokemonCard({ id, name, currentPage }: PokemonCardProps) {
 	const { data: pokemon } = useGetPokemonQuery(id, {
 		refetchOnMountOrArgChange: false,
 		refetchOnFocus: false,
@@ -31,9 +32,14 @@ export function PokemonCard({ id, name }: PokemonCardProps) {
 		? getTypeBackgroundColor(primaryType)
 		: 'bg-gray-50'
 
+	const detailUrl =
+		currentPage !== undefined
+			? `/pokemon/${id}?fromPage=${currentPage + 1}`
+			: `/pokemon/${id}`
+
 	return (
 		<Link
-			to={`/pokemon/${id}`}
+			to={detailUrl}
 			className={`${backgroundColor} rounded-lg shadow-md p-4 hover:shadow-lg transition-all duration-200 w-full text-left block border-2 ${borderColor}`}
 			aria-label={`View details for ${name}`}
 		>
